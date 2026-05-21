@@ -10,6 +10,8 @@ namespace Weapon
         [SerializeField] private WeaponInventory _inventory;
         [SerializeField] private Camera _playerCamera;
 
+        [SerializeField] private RecoilController _recoilController; 
+
         [SerializeField] private ObjectPool _bulletPool; 
         [SerializeField] private ObjectPool _impactPool;  
 
@@ -45,6 +47,11 @@ namespace Weapon
             if (cameraLook != null)
             {
                 cameraLook.AddRecoil(Mathf.Abs(activeWeapon.RecoilData.VerticalKick), activeWeapon.RecoilData.HorizontalSpread);
+            }
+
+            if (_recoilController != null)
+            {
+                _recoilController.ApplyRecoil();
             }
 
             Ray ray = _playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));

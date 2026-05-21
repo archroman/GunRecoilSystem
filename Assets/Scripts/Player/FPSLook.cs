@@ -1,48 +1,48 @@
-using UnityEngine;
+    using UnityEngine;
 
-namespace Player
-{
-    internal sealed class FPSLook : MonoBehaviour
+    namespace Player
     {
-        [SerializeField] private float _mouseSensitivity = 2f;
-
-        [SerializeField] private Transform _playerBody;
-
-        [SerializeField] private float _snappiness = 10f;
-        [SerializeField] private float _returnSpeed = 5f;
-
-        private float _xRotation = 0f;
-    
-        private Vector3 _recoilRotation;
-        private Vector3 _currentRecoilRotation;
-
-        private void Start()
+        internal sealed class FPSLook : MonoBehaviour
         {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
+            [SerializeField] private float _mouseSensitivity = 2f;
 
-        private void Update()
-        {
-            float mouseX = Input.GetAxis("Mouse X") * _mouseSensitivity;
-            float mouseY = Input.GetAxis("Mouse Y") * _mouseSensitivity;
+            [SerializeField] private Transform _playerBody;
 
-            _recoilRotation = Vector3.Lerp(_recoilRotation, Vector3.zero, _returnSpeed * Time.deltaTime);
-            _currentRecoilRotation = Vector3.Lerp(_currentRecoilRotation, _recoilRotation, _snappiness * Time.deltaTime);
+            [SerializeField] private float _snappiness = 10f;
+            [SerializeField] private float _returnSpeed = 5f;
 
-            _xRotation -= mouseY;
-            _xRotation = Mathf.Clamp(_xRotation, -90f, 90f); 
+            private float _xRotation = 0f;
+        
+            private Vector3 _recoilRotation;
+            private Vector3 _currentRecoilRotation;
 
-            transform.localRotation = Quaternion.Euler(_xRotation + _currentRecoilRotation.x, _currentRecoilRotation.y, 0f);
+            private void Start()
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
 
-            if (_playerBody != null)
-                _playerBody.Rotate(Vector3.up * mouseX);
-        }
+            private void Update()
+            {
+                float mouseX = Input.GetAxis("Mouse X") * _mouseSensitivity;
+                float mouseY = Input.GetAxis("Mouse Y") * _mouseSensitivity;
 
-        public void AddRecoil(float verticalKick, float horizontalSpread)
-        {
-            float randomHorizontal = Random.Range(-horizontalSpread, horizontalSpread);
-            _recoilRotation += new Vector3(-verticalKick, randomHorizontal, 0f);
+                _recoilRotation = Vector3.Lerp(_recoilRotation, Vector3.zero, _returnSpeed * Time.deltaTime);
+                _currentRecoilRotation = Vector3.Lerp(_currentRecoilRotation, _recoilRotation, _snappiness * Time.deltaTime);
+
+                _xRotation -= mouseY;
+                _xRotation = Mathf.Clamp(_xRotation, -90f, 90f); 
+
+                transform.localRotation = Quaternion.Euler(_xRotation + _currentRecoilRotation.x, _currentRecoilRotation.y, 0f);
+
+                if (_playerBody != null)
+                    _playerBody.Rotate(Vector3.up * mouseX);
+            }
+
+            public void AddRecoil(float verticalKick, float horizontalSpread)
+            {
+                float randomHorizontal = Random.Range(-horizontalSpread, horizontalSpread);
+                _recoilRotation += new Vector3(-verticalKick, randomHorizontal, 0f);
+            }
         }
     }
-}
