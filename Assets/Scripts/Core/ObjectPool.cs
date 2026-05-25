@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Core
 {
-    public sealed class ObjectPool : MonoBehaviour
+    internal sealed class ObjectPool : MonoBehaviour
     {
         [SerializeField] private GameObject _prefab;
         [SerializeField] private int _initialSize = 30;

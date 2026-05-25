@@ -2,6 +2,7 @@ using Bullet;
 using UnityEngine;
 using Core;
 using Player;
+using System.Collections;
 
 namespace Weapon
 {
@@ -9,7 +10,6 @@ namespace Weapon
     {
         [SerializeField] private WeaponInventory _inventory;
         [SerializeField] private Camera _playerCamera;
-
         [SerializeField] private RecoilController _recoilController; 
 
         [SerializeField] private ObjectPool _bulletPool; 
@@ -18,6 +18,7 @@ namespace Weapon
         [SerializeField] private float _maxShotDistance = 100f;
 
         private float _nextFireTime;
+        private bool _isReloading = false; 
 
         private void Start()
         {
@@ -31,17 +32,35 @@ namespace Weapon
             WeaponData activeWeapon = _inventory.CurrentWeapon;
             if (activeWeapon == null) return;
 
-            if (Input.GetKey(KeyCode.Mouse0) && Time.time >= _nextFireTime)
+            WeaponMagazine magazine = activeWeapon.Magazine;
+            if (magazine == null) return;
+
+            if (Input.GetKeyDown(KeyCode.R) && !_isReloading)
             {
-                _nextFireTime = Time.time + activeWeapon.FireRate;
-                Shoot();
+                if (!magazine.IsFull() && magazine.HasReserve())
+                {
+                    StartCoroutine(ReloadRoutine(activeWeapon, magazine));
+                }
+            }
+
+            if (Input.GetKey(KeyCode.Mouse0) && Time.time >= _nextFireTime && !_isReloading)
+            {
+                if (magazine.HasAmmo())
+                {
+                    _nextFireTime = Time.time + activeWeapon.FireRate;
+                    Shoot(activeWeapon, magazine);
+                }
+                else if (magazine.HasReserve())
+                {
+                    StartCoroutine(ReloadRoutine(activeWeapon, magazine));
+                }
             }
         }
 
-        private void Shoot()
+        private void Shoot(WeaponData activeWeapon, WeaponMagazine magazine)
         {
-            WeaponData activeWeapon = _inventory.CurrentWeapon;
-            if (activeWeapon == null || _playerCamera == null) return;
+            magazine.SpendAmmo();
+            Debug.Log($"Патроны: {magazine.CurrentAmmo} / {magazine.CurrentReserve}");
 
             FPSLook cameraLook = GetComponentInParent<FPSLook>();
             if (cameraLook != null)
@@ -68,6 +87,22 @@ namespace Weapon
             }
 
             SpawnBullet(activeWeapon.MuzzlePoint.position, targetPoint);
+        }
+
+        private IEnumerator ReloadRoutine(WeaponData activeWeapon, WeaponMagazine magazine)
+        {
+            _isReloading = true;
+            Debug.Log("Перезарядка...");
+
+            yield return new WaitForSeconds(activeWeapon.ReloadTime);
+
+            int ammoNeeded = magazine.GetNeededAmmo();
+            int ammoToLoad = Mathf.Min(ammoNeeded, magazine.CurrentReserve);
+
+            magazine.LoadAmmo(ammoToLoad);
+
+            _isReloading = false;
+            Debug.Log("Перезарядка завершена!");
         }
 
         private void SpawnBullet(Vector3 start, Vector3 end)

@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Data
 {
     [CreateAssetMenu(fileName = "NewRecoilData", menuName = "Weapon/Recoil Data")]
-    internal sealed class RecoilData : ScriptableObject
+    public sealed class RecoilData : ScriptableObject
     {
         [SerializeField] private float _verticalKick = -3f;
         [SerializeField] private float _horizontalSpread = 1.5f;
